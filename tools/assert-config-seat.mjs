@@ -39,17 +39,8 @@ check("the row-level seat is kept, keyed package#row", () => {
 });
 
 check("both plugin-page seats render the card and summary handler", () => {
-  // The fork adds a third seat: a `settings.plugins.tab` beside the user's
-  // switcher tabs. That one always renders the full card (no summary view).
-  assert.equal((client.match(/react_jsx_runtime\.jsx\(FreeSearchCard, \{ page: true \}\)/g) || []).length, 3);
+  assert.equal((client.match(/react_jsx_runtime\.jsx\(FreeSearchCard, \{ page: true \}\)/g) || []).length, 2);
   assert.equal((client.match(/slotProps\.view === "summary"/g) || []).length, 2);
-});
-
-check("the fork registers a switcher-group settings tab", () => {
-  assert.match(client, /ctx\.slots\.inject\("settings\.plugins\.tab", \(\) =>/);
-  assert.match(client, /name: "settings\.plugins\.tab"/);
-  assert.match(client, /id: "free-search-config"/);
-  assert.match(client, /order: 3/);
 });
 
 console.log(`OK: ${checks} config-seat checks passed`);
