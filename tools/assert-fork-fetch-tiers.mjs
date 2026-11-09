@@ -15,7 +15,7 @@ let checks = 0;
 const check = async (name, fn) => { await fn(); checks++; console.log(`  ok  ${name}`); };
 const keys = { EXA_API_KEY: "k", FIRECRAWL_API_KEY: "k", CRAWL4AI_API_KEY: "k" };
 const logger = { info() {}, warn() {}, error() {}, debug() {} };
-const url = "https://127.0.0.1/nonexistent-host-xyz";
+const url = "https://test-nonexistent-host.example/page";
 
 function reset() {
   for (const k of Object.keys(CONTROLLED_STUBS)) CONTROLLED_STUBS[k] = null;
@@ -23,24 +23,27 @@ function reset() {
 
 await check("source declares both #106 settings and wires them live", () => {
   assert.match(indexSrc, /browserFetch: z\.boolean\(\)\.default\(true\)\.volatile\(\)/);
-  assert.match(indexSrc, /fetchTierOrder: z\.string\(\)\.default\("exa-first"\)\.volatile\(\)/);
-  assert.match(indexSrc, /browser: \(\) => current\(\)\.browserFetch !== false/);
-  assert.match(indexSrc, /tierOrder: \(\) =>/);
+  // 0.9.39 upstream renamed the tier-order knob: fetchPrefer ("exa"/"firecrawl").
+  // Either the upstream name or the original fork name satisfies this guard —
+  // the essential property is that a volatile config field exists and is wired.
+  assert.match(indexSrc, /(fetchPrefer|fetchTierOrder): z\.string\(\)\.default\("(exa|exa-first)"\)\.volatile\(\)/);
+  assert.match(indexSrc, /(browserEnabled|browser): \(\) => current\(\)\.browserFetch !== false/);
+  assert.match(indexSrc, /(prefer|tierOrder): \(\) =>/);
   assert.match(clientSrc, /path: \["browserFetch"\]/);
-  assert.match(clientSrc, /path: \["fetchTierOrder"\]/);
+  assert.match(clientSrc, /path: \["(fetchPrefer|fetchTierOrder)"\]/);
 });
 
 await check("browser=false skips the headless-browser tier entirely", async () => {
   reset();
   let exa = 0;
   CONTROLLED_STUBS.exa = async () => { exa += 1; return "e".repeat(500); };
-  const p = createFetchProvider({ resolveApiKey: async (env) => keys[env], logger, browser: () => false });
+  const p = createFetchProvider({ resolveApiKey: async (env) => keys[env], logger, browserEnabled: () => false, validateUrl: async () => {} });
   const t0 = Date.now();
   const r = await p.fetch({ url }, undefined);
   assert.equal(r.body.content[0], "e");
   assert.equal(exa, 1);
   assert.ok(Date.now() - t0 < 2000, "no 25s browser probe");
-  assert.match(providerSrc, /const browserPath = browserEnabled \? findSystemBrowser\(\) : null/);
+  assert.match(providerSrc, /if \(browserEnabled\(\) && browserPath\)/);
 });
 
 await check("firecrawl-first serves from firecrawl with exa untouched", async () => {
@@ -50,7 +53,7 @@ await check("firecrawl-first serves from firecrawl with exa untouched", async ()
   CONTROLLED_STUBS.firecrawl = async () => { fc += 1; return "f".repeat(500); };
   const p = createFetchProvider({
     resolveApiKey: async (env) => keys[env], logger,
-    browser: () => false, tierOrder: () => "firecrawl-first",
+    browserEnabled: () => false, prefer: () => "firecrawl", validateUrl: async () => {},
   });
   const r = await p.fetch({ url }, undefined);
   assert.equal(r.body.content[0], "f");
@@ -63,7 +66,7 @@ await check("exa-first stays the default (upstream behaviour)", async () => {
   let exa = 0, fc = 0;
   CONTROLLED_STUBS.exa = async () => { exa += 1; return "e".repeat(500); };
   CONTROLLED_STUBS.firecrawl = async () => { fc += 1; return "f".repeat(500); };
-  const p = createFetchProvider({ resolveApiKey: async (env) => keys[env], logger, browser: () => false });
+  const p = createFetchProvider({ resolveApiKey: async (env) => keys[env], logger, browserEnabled: () => false, validateUrl: async () => {} });
   const r = await p.fetch({ url }, undefined);
   assert.equal(r.body.content[0], "e");
   assert.equal(exa, 1);
