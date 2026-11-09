@@ -3,209 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DSH 搜索引擎切换器</title>
+<title>dsh-free-search 引擎切换器</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
     padding: 20px;
   }
   .card {
-    background: rgba(255,255,255,0.07);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 16px;
-    padding: 40px;
-    max-width: 520px;
-    width: 100%;
-    color: #e8e8f0;
+    background: rgba(255,255,255,0.07); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 16px;
+    padding: 32px; max-width: 600px; width: 100%; color: #e8e8f0;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   }
-  h1 { font-size: 22px; margin-bottom: 8px; color: #fff; }
-  .subtitle { font-size: 13px; color: #9aa0b5; margin-bottom: 28px; }
-  .engine-list {
-    list-style: none;
-    display: flex; flex-direction: column; gap: 10px;
-    margin-bottom: 24px;
-  }
+  h1 { font-size: 20px; margin-bottom: 6px; color: #fff; }
+  .subtitle { font-size: 12px; color: #9aa0b5; margin-bottom: 20px; line-height: 1.6; }
+  .meta { font-size: 12px; color: #8b93a8; background: rgba(0,0,0,0.25);
+          padding: 10px 14px; border-radius: 8px; margin-bottom: 18px; line-height: 1.8; }
+  .meta b { color: #4dabf7; font-weight: 600; }
+  .warn { font-size: 12px; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px;
+          background: rgba(240,170,60,0.12); color: #f0c07a; border: 1px solid rgba(240,170,60,0.3); line-height: 1.7; }
+  .group-title { font-size: 12px; color: #7d8598; margin: 16px 0 8px; font-weight: 600; letter-spacing: .5px; }
+  .engine-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .engine-list label {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 16px;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: rgba(255,255,255,0.03);
+    display: flex; align-items: center; gap: 8px; padding: 9px 11px;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer;
+    transition: all .18s; background: rgba(255,255,255,0.03); font-size: 13px;
   }
   .engine-list label:hover { background: rgba(255,255,255,0.08); }
-  .engine-list label.active {
-    border-color: #4dabf7;
-    background: rgba(77,171,247,0.12);
-    box-shadow: 0 0 0 1px #4dabf7;
-  }
-  .engine-list input[type=radio] { accent-color: #4dabf7; width: 16px; height: 16px; }
-  .engine-info { flex: 1; }
-  .engine-name { font-weight: 600; font-size: 15px; }
-  .engine-desc { font-size: 12px; color: #9aa0b5; margin-top: 2px; }
-  .engine-badge {
-    font-size: 11px; padding: 3px 8px; border-radius: 20px;
-    background: rgba(80,200,120,0.15); color: #7ddb9c;
-    border: 1px solid rgba(80,200,120,0.3);
-  }
-  .btn {
-    width: 100%; padding: 14px; border: none; border-radius: 10px;
-    font-size: 15px; font-weight: 600; cursor: pointer;
-    background: #4dabf7; color: #fff;
-    transition: all 0.2s;
-  }
+  .engine-list label.active { border-color: #4dabf7; background: rgba(77,171,247,0.14); box-shadow: 0 0 0 1px #4dabf7; }
+  .engine-list input[type=radio] { accent-color: #4dabf7; width: 14px; height: 14px; flex: none; }
+  .badge { font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: auto; flex: none;
+           background: rgba(80,200,120,0.15); color: #7ddb9c; border: 1px solid rgba(80,200,120,0.3); }
+  .badge.paid { background: rgba(240,170,60,0.12); color: #f0c07a; border-color: rgba(240,170,60,0.3); }
+  .btn { width: 100%; padding: 13px; border: none; border-radius: 10px; margin-top: 18px;
+         font-size: 14px; font-weight: 600; cursor: pointer; background: #4dabf7; color: #fff; transition: all .2s; }
   .btn:hover { background: #3d94e0; }
   .btn:disabled { background: #3a3f5a; cursor: not-allowed; }
-  .status {
-    margin-top: 16px; font-size: 13px; min-height: 20px;
-    padding: 10px 14px; border-radius: 8px; display: none;
-  }
+  .status { margin-top: 14px; font-size: 12px; padding: 11px 14px; border-radius: 8px; display: none; line-height: 1.7; }
   .status.ok { display: block; background: rgba(80,200,120,0.12); color: #7ddb9c; border: 1px solid rgba(80,200,120,0.3); }
   .status.err { display: block; background: rgba(240,90,90,0.12); color: #f08a8a; border: 1px solid rgba(240,90,90,0.3); }
-  .footer { margin-top: 20px; font-size: 11px; color: #6a7088; text-align: center; }
-  .current { font-size: 13px; color: #4dabf7; margin-bottom: 16px; }
-  code {
-    background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px;
-    font-family: Consolas, monospace; font-size: 12px;
-  }
+  .footer { margin-top: 16px; font-size: 11px; color: #6a7088; text-align: center; line-height: 1.7; }
+  code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-family: Consolas, monospace; font-size: 11px; }
 </style>
 </head>
 <body>
 <div class="card">
-  <h1>🔍 DSH 搜索引擎切换器</h1>
-  <div class="subtitle">dsh-free-search 插件 · 免费多引擎搜索配置</div>
-  <div class="current" id="current">正在读取当前配置…</div>
+  <h1>dsh-free-search 引擎切换器</h1>
+  <div class="subtitle">选择「搜索引擎」。只影响 free-search 插件内部的引擎选择。</div>
 
-  <ul class="engine-list">
-    <li><label data-engine="ddg">
-      <input type="radio" name="engine" value="ddg">
-      <div class="engine-info">
-        <div class="engine-name">DuckDuckGo (html)</div>
-        <div class="engine-desc">默认 · 区域可配 · 平衡</div>
-      </div>
-      <span class="engine-badge">免费</span>
-    </label></li>
-    <li><label data-engine="ddg-lite">
-      <input type="radio" name="engine" value="ddg-lite">
-      <div class="engine-info">
-        <div class="engine-name">DuckDuckGo (lite)</div>
-        <div class="engine-desc">轻量版 · 无区域</div>
-      </div>
-      <span class="engine-badge">免费</span>
-    </label></li>
-    <li><label data-engine="bing">
-      <input type="radio" name="engine" value="bing">
-      <div class="engine-info">
-        <div class="engine-name">Bing</div>
-        <div class="engine-desc">中文市场优化 (zh-CN) · 结果质量好</div>
-      </div>
-      <span class="engine-badge">免费</span>
-    </label></li>
-    <li><label data-engine="mojeek">
-      <input type="radio" name="engine" value="mojeek">
-      <div class="engine-info">
-        <div class="engine-name">Mojeek</div>
-        <div class="engine-desc">隐私友好 · 偏英文结果</div>
-      </div>
-      <span class="engine-badge">免费</span>
-    </label></li>
-    <li><label data-engine="exa">
-      <input type="radio" name="engine" value="exa">
-      <div class="engine-info">
-        <div class="engine-name">Exa</div>
-        <div class="engine-desc">AI 搜索 · 需 EXA_API_KEY</div>
-      </div>
-      <span class="engine-badge">付费</span>
-    </label></li>
-    <li><label data-engine="perplexity">
-      <input type="radio" name="engine" value="perplexity">
-      <div class="engine-info">
-        <div class="engine-name">Perplexity</div>
-        <div class="engine-desc">AI 搜索 · 需 PERPLEXITY_API_KEY</div>
-      </div>
-      <span class="engine-badge">付费</span>
-    </label></li>
-  </ul>
+  <div class="meta" id="meta">正在读取…</div>
+  <div class="warn" id="warn" style="display:none"></div>
 
-  <button class="btn" id="apply" disabled>应用并写入配置</button>
+  <div class="group-title">路由模式</div>
+  <ul class="engine-list" id="modes"></ul>
+
+  <div class="group-title">指定引擎</div>
+  <ul class="engine-list" id="engines"></ul>
+
+  <button class="btn" id="apply" disabled>应用</button>
   <div class="status" id="status"></div>
-  <div class="footer">写入 <code>~/.dsh/profiles/web/cordis.patch.yml</code> · 改完需重启 <code>dsh web</code></div>
+
+  <div class="footer">
+    写入 <code>web-search-free</code> 条目的 <code>provider</code>（引擎名）<br>
+    绝不修改 <code>searchProvider</code>（provider id）与 <code>- id: web</code>
+  </div>
 </div>
 
 <script>
-const ENGINES = { ddg: 1, "ddg-lite": 1, bing: 1, mojeek: 1, exa: 1, perplexity: 1 };
-const LABELS = {
-  ddg: "DuckDuckGo (html)", "ddg-lite": "DuckDuckGo (lite)", bing: "Bing",
-  mojeek: "Mojeek", exa: "Exa", perplexity: "Perplexity", "deepseek-official": "DeepSeek 官方"
+const state = {
+  current: null,
+  selected: null,
+  freeEngines: new Set(),
+  meta: null,
 };
 
-let currentEngine = null;
-const radios = document.querySelectorAll('input[name=engine]');
-const applyBtn = document.getElementById('apply');
-const statusBox = document.getElementById('status');
+const $ = (id) => document.getElementById(id);
 
-radios.forEach(r => r.addEventListener('change', () => {
-  const engine = document.querySelector('input[name=engine]:checked').value;
-  document.querySelectorAll('.engine-list label').forEach(l => {
-    l.classList.toggle('active', l.dataset.engine === engine);
-  });
-  applyBtn.disabled = (engine === currentEngine);
-}));
+function render() {
+  const modes = ['auto', 'multi'];
+  const engines = state.meta?.engines ?? [];
 
-applyBtn.addEventListener('click', async () => {
-  const engine = document.querySelector('input[name=engine]:checked').value;
-  applyBtn.disabled = true;
-  statusBox.className = 'status';
+  const build = (list, container, descriptions) => {
+    container.innerHTML = '';
+    for (const name of list) {
+      const li = document.createElement('li');
+      const label = document.createElement('label');
+      label.dataset.engine = name;
+      if (name === state.selected) label.classList.add('active');
+
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'engine';
+      radio.value = name;
+      radio.checked = (name === state.selected);
+      radio.addEventListener('change', () => {
+        state.selected = name;
+        $('apply').disabled = (name === state.current);
+        document.querySelectorAll('.engine-list label').forEach((l) => {
+          l.classList.toggle('active', l.dataset.engine === name);
+        });
+      });
+
+      const text = document.createElement('span');
+      text.textContent = name;
+
+      label.appendChild(radio);
+      label.appendChild(text);
+
+      if (descriptions && descriptions[name]) {
+        const badge = document.createElement('span');
+        badge.className = 'badge ' + (descriptions[name].cls || '');
+        badge.textContent = descriptions[name].text;
+        label.appendChild(badge);
+      }
+
+      li.appendChild(label);
+      container.appendChild(li);
+    }
+  };
+
+  build(modes, $('modes'), null);
+  build(engines, $('engines'), Object.fromEntries(
+    engines.map((e) => [e, state.freeEngines.has(e)
+      ? { text: '免key', cls: '' }
+      : { text: '需key', cls: 'paid' }])
+  ));
+
+  if (state.meta) {
+    const m = state.meta;
+    $('meta').innerHTML =
+      'profile: <b>' + m.profile + '</b><br>' +
+      '当前引擎: <b>' + (m.engine || '(未设置)') + '</b><br>' +
+      'provider id（只读）: <b>' + (m.searchProvider || '(未设置)') + '</b><br>' +
+      '<span style="font-size:11px">' + m.patchFile + '</span>';
+
+    if (m.issues && m.issues.length) {
+      $('warn').style.display = 'block';
+      $('warn').innerHTML = m.issues.map((i) => '⚠️ ' + i).join('<br>');
+    } else {
+      $('warn').style.display = 'none';
+    }
+  }
+}
+
+function showStatus(kind, text) {
+  const box = $('status');
+  box.className = 'status ' + kind;
+  box.innerHTML = text;
+}
+
+async function load() {
+  try {
+    const res = await fetch('/api/state');
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || '读取失败');
+    state.meta = data;
+    state.current = data.engine;
+    state.selected = data.engine;
+    state.freeEngines = new Set(data.freeEngines || []);
+    render();
+    $('apply').disabled = true;
+  } catch (e) {
+    $('meta').textContent = '读取失败: ' + e.message;
+  }
+}
+
+$('apply').addEventListener('click', async () => {
+  const engine = state.selected;
+  if (!engine) return;
+  $('apply').disabled = true;
   try {
     const res = await fetch('/api/switch', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ engine })
+      body: JSON.stringify({ engine }),
     });
     const result = await res.json();
     if (result.ok) {
-      statusBox.className = 'status ok';
-      statusBox.textContent = '✅ 已切换到 ' + LABELS[engine] + '。请重启 dsh web 生效！';
-      currentEngine = engine;
-      applyBtn.disabled = true;
+      state.current = result.engine;
+      showStatus('ok',
+        '已切换引擎为 <b>' + result.engine + '</b>（原值: ' + (result.previous || '无') + '）<br>' +
+        '<span style="font-size:11px">备份: ' + result.backup + '</span>');
+      await load();
     } else {
-      statusBox.className = 'status err';
-      statusBox.textContent = '❌ ' + result.error;
-      applyBtn.disabled = false;
+      showStatus('err', '失败: ' + result.error);
+      $('apply').disabled = false;
     }
   } catch (e) {
-    statusBox.className = 'status err';
-    statusBox.textContent = '❌ ' + e.message;
-    applyBtn.disabled = false;
+    showStatus('err', '失败: ' + e.message);
+    $('apply').disabled = false;
   }
 });
 
-// 读取当前配置
-(async () => {
-  try {
-    const res = await fetch('/api/current');
-    const cfg = await res.json();
-    if (cfg.ok && cfg.engine) {
-      currentEngine = cfg.engine;
-      const name = LABELS[cfg.engine] || cfg.engine;
-      document.getElementById('current').textContent = '当前: ' + name;
-      const radio = document.querySelector(`input[name=engine][value="${cfg.engine}"]`);
-      if (radio) { radio.checked = true; }
-      applyBtn.disabled = true;
-    } else {
-      document.getElementById('current').textContent = '当前: 未知';
-    }
-  } catch {
-    document.getElementById('current').textContent = '当前: 未知';
-  }
-})();
+load();
 </script>
 </body>
 </html>
