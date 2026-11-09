@@ -70,7 +70,11 @@ const before = {};
 for (const p of usable) {
   const snap = snapshot(p.name);
   before[p.name] = snap;
-  check(snap.hasEntry, `${p.name}: 有 ${ENTRY_ID} 条目`);
+  // web-search-free 条目只有在设置页第一次保存引擎后才会落进用户 patch
+  // （bundle 层的 cordis.patch.yml 不算）。干净安装上这里为 null 是正常的，
+  // 所以只提示、不判失败。
+  if (snap.hasEntry) console.log(`  ok  ${p.name}: 有 ${ENTRY_ID} 条目`);
+  else console.log(`  --  ${p.name}: 无 ${ENTRY_ID} 条目（尚未在设置页保存过引擎，属正常）`);
   check(snap.webRows <= 1, `${p.name}: - id: web 不重复（${snap.webRows}）`);
   const engineValid = snap.engine === null || isValidEngine(snap.engine);
   check(engineValid, `${p.name}: 引擎合法（${snap.engine ?? '未设置'}）`);
