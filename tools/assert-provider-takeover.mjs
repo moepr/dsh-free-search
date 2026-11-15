@@ -28,7 +28,7 @@ function makeCtx({ searchProvider, fetchProvider, hasConfigRefs = false, duplica
   const web = {
     registerSearchProvider() {
       registrations.search++;
-      if (duplicateRegisters) throw duplicate("ddg");
+      if (duplicateRegisters) throw duplicate("free-search");
     },
     registerFetchProvider() {
       registrations.fetch++;
@@ -66,12 +66,12 @@ function run(options = {}) {
 
 check("legacy API: an unset searchProvider is taken over", () => {
   const { web } = run({});
-  assert.equal(web.searchProviderId, "ddg");
+  assert.equal(web.searchProviderId, "free-search");
 });
 
 check("legacy API: the factory default deepseek-official is replaced", () => {
   const { web } = run({ searchProvider: "deepseek-official", fetchProvider: "http" });
-  assert.equal(web.searchProviderId, "ddg");
+  assert.equal(web.searchProviderId, "free-search");
   assert.equal(web.fetchProviderId, "fs-quality-fetch");
 });
 
@@ -86,7 +86,7 @@ check("rc.2 API: the takeover goes through a single settings.mutate(web)", () =>
   assert.equal(mutations.length, 1);
   assert.deepEqual(mutations[0].ops, [
     { op: "set", path: ["fetchProvider"], value: "fs-quality-fetch" },
-    { op: "set", path: ["searchProvider"], value: "ddg" },
+    { op: "set", path: ["searchProvider"], value: "free-search" },
   ]);
 });
 
@@ -96,7 +96,7 @@ check("rc.2 API: no takeover when a foreign provider is selected", () => {
 });
 
 check("rc.2 API: an explicit plugin id is not rewritten", () => {
-  const { mutations } = run({ searchProvider: "ddg", fetchProvider: "fs-quality-fetch", hasConfigRefs: true });
+  const { mutations } = run({ searchProvider: "free-search", fetchProvider: "fs-quality-fetch", hasConfigRefs: true });
   assert.equal(mutations.length, 0);
 });
 
@@ -106,7 +106,7 @@ check("legacy API: fetchProviderTakeover=false leaves an explicit http alone", (
     fetchProvider: "http",
     config: { fetchProviderTakeover: false },
   });
-  assert.equal(web.searchProviderId, "ddg");
+  assert.equal(web.searchProviderId, "free-search");
   assert.equal(web.fetchProviderId, "http");
 });
 
@@ -140,10 +140,10 @@ check("repeated takeover logs are deduplicated per process", () => {
 
 await checkAsync("#82 diagnostic ignores describe()-triggered noise", async () => {
   const { ctx, handlers, logs } = makeCtx({
-    searchProvider: "ddg",
+    searchProvider: "free-search",
     fetchProvider: "fs-quality-fetch",
     hasConfigRefs: true,
-    describeValue: { searchProvider: "ddg", fetchProvider: "fs-quality-fetch", cache: true },
+    describeValue: { searchProvider: "free-search", fetchProvider: "fs-quality-fetch", cache: true },
     describeUid: 94,
   });
   apply(ctx, baseConfig());
@@ -156,10 +156,10 @@ await checkAsync("#82 diagnostic ignores describe()-triggered noise", async () =
 
 await checkAsync("#82 diagnostic reports a nested config change", async () => {
   const { ctx, handlers, described, logs } = makeCtx({
-    searchProvider: "ddg",
+    searchProvider: "free-search",
     fetchProvider: "fs-quality-fetch",
     hasConfigRefs: true,
-    describeValue: { cache: true, providers: { search: "ddg" } },
+    describeValue: { cache: true, providers: { search: "free-search" } },
     describeUid: 94,
   });
   apply(ctx, baseConfig());
@@ -170,16 +170,16 @@ await checkAsync("#82 diagnostic reports a nested config change", async () => {
   await tick();
   const line = logs.find((entry) => entry.includes("the web entry changed"));
   assert.ok(line, "the change must be logged");
-  assert.match(line, /config providers\.search: "ddg" → "someone-else"/);
+  assert.match(line, /config providers\.search: "free-search" → "someone-else"/);
   assert.doesNotMatch(line, /cache/);
 });
 
 await checkAsync("#82 diagnostic reports a web service rebuild", async () => {
   const { ctx, handlers, described, logs } = makeCtx({
-    searchProvider: "ddg",
+    searchProvider: "free-search",
     fetchProvider: "fs-quality-fetch",
     hasConfigRefs: true,
-    describeValue: { searchProvider: "ddg", fetchProvider: "fs-quality-fetch" },
+    describeValue: { searchProvider: "free-search", fetchProvider: "fs-quality-fetch" },
     describeUid: 94,
   });
   apply(ctx, baseConfig());
@@ -195,10 +195,10 @@ await checkAsync("#82 diagnostic reports a web service rebuild", async () => {
 
 await checkAsync("#86 reclaims the shipped default after DSH's search switch is turned off", async () => {
   const { ctx, handlers, described, mutations } = makeCtx({
-    searchProvider: "ddg",
+    searchProvider: "free-search",
     fetchProvider: "fs-quality-fetch",
     hasConfigRefs: true,
-    describeValue: { searchProvider: "ddg", fetchProvider: "fs-quality-fetch" },
+    describeValue: { searchProvider: "free-search", fetchProvider: "fs-quality-fetch" },
     describeUid: 94,
   });
   apply(ctx, baseConfig());
@@ -210,16 +210,16 @@ await checkAsync("#86 reclaims the shipped default after DSH's search switch is 
   await tick();
   await tick();
   const ops = mutations.filter((entry) => entry.ns === "web").flatMap((entry) => entry.ops);
-  assert.equal(ops.find((op) => op.path?.[0] === "searchProvider")?.value, "ddg");
+  assert.equal(ops.find((op) => op.path?.[0] === "searchProvider")?.value, "free-search");
   assert.equal(ops.find((op) => op.path?.[0] === "fetchProvider")?.value, "fs-quality-fetch");
 });
 
 await checkAsync("#86 never fights an explicit deepseek-search-api choice", async () => {
   const { ctx, handlers, described, mutations } = makeCtx({
-    searchProvider: "ddg",
+    searchProvider: "free-search",
     fetchProvider: "fs-quality-fetch",
     hasConfigRefs: true,
-    describeValue: { searchProvider: "ddg", fetchProvider: "fs-quality-fetch" },
+    describeValue: { searchProvider: "free-search", fetchProvider: "fs-quality-fetch" },
     describeUid: 94,
   });
   apply(ctx, baseConfig());
