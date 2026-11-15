@@ -4,7 +4,7 @@
 //   1. 本文件只改 `web-search-free` 条目里的 `provider`（= 引擎名，如 bing/auto），
 //      **绝不触碰 `searchProvider`**（= provider id，属于 @deepseek-ai/dsh-web 与
 //      dsh-web-search-switcher 的管辖范围）。两者是不同的东西：
-//        searchProvider: ddg      ← provider id，由 free-search 插件运行时接管
+//        searchProvider: free-search      ← provider id，由 free-search 插件运行时接管
 //        provider: bing           ← 引擎，由本工具切换
 //   2. 绝不新增 `- id: web` 行（重复行会让后者静默覆盖前者，且造成悬空引用）。
 //   3. profile 严格跟随「插件装在哪个 profile」——web 装的只改 web，desktop 装的只改

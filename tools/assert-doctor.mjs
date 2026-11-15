@@ -17,7 +17,7 @@ const report = buildDoctorReport({
   dshHome: "C:/home/.dsh",
   provider: "",
   effectiveProvider: "parallel",
-  searchProvider: "ddg",
+  searchProvider: "free-search",
   fetchProvider: "fs-quality-fetch",
   promptLanguage: "zh",
   promptChars: 1951,

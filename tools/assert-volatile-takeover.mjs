@@ -1,7 +1,7 @@
 // Fork guard (#107 uninstall residue): the provider take-over must write the
 // in-memory cosmokit volatile ref, NOT settings.mutate("web", …). The latter
 // persists into cordis.patch.yml; after uninstall/disable that leaves a dangling
-// `searchProvider: ddg` with no registered ddg (upstream issue #51/#107), and
+// `searchProvider: free-search` with no registered free-search (upstream issue #51/#107), and
 // the config write also rebuilds the web service (#82 boot loop).
 import assert from "node:assert/strict";
 import { createVolatile } from "@deepseek-ai/cosmokit";
@@ -57,7 +57,7 @@ check("a real volatile ref has the shared cosmokit writer", () => {
 check("runtime take-over writes the volatile ref in memory", () => {
   const { ctx, refs } = makeCtx();
   apply(ctx, config());
-  assert.equal(refs.searchProvider.get(), "ddg");
+  assert.equal(refs.searchProvider.get(), "free-search");
   assert.equal(refs.fetchProvider.get(), "fs-quality-fetch");
 });
 

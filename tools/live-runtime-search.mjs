@@ -45,8 +45,8 @@ ctx.reflect.provide("credentials", {
   },
 });
 
-// The plugin's own provider id is "ddg"; pin it so resolution is deterministic.
-const web = new WebRuntime(ctx, { searchProvider: "ddg", fetchProvider: "fs-quality-fetch" });
+// The plugin's own provider id is "free-search"; pin it so resolution is deterministic.
+const web = new WebRuntime(ctx, { searchProvider: "free-search", fetchProvider: "fs-quality-fetch" });
 
 const config = new mod.Config({
   provider: "deepseek-tools",
