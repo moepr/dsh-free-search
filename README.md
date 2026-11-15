@@ -227,7 +227,7 @@ dsh web
 
 插件加载后**自动接管搜索**：
 
-- `web.searchProvider` 未设置，或仍是 DSH 出厂默认的官方搜索 `deepseek-official` 时，自动切换为本插件的 provider（id 固定为 `ddg`）；
+- `web.searchProvider` 未设置，或仍是 DSH 出厂默认的官方搜索 `deepseek-official` 时，自动切换为本插件的 provider（id 固定为 `free-search`）；
 - 如果（你或别的插件）已显式选择其他 provider，本插件不抢占，只在启动日志输出 WARN 与切换用的 YAML。
 
 **接管会写进 profile（DSH 0.2.x）**：从 `0.2.0-rc.2` 起 provider 选择存放在 config 的 volatile ref 里，只能经 `settings.mutate("web", …)` 写入，落盘结果就是 `profiles/<profile>/cordis.patch.yml` 多出：
@@ -235,14 +235,14 @@ dsh web
 ```yaml
 - id: web
   config:
-    searchProvider: ddg
+    searchProvider: free-search
     fetchProvider: fs-quality-fetch
 ```
 
-所以**停用或卸载本插件之前，请先删掉 `- id: web` 这两行**（或整行删掉让 DSH 回到出厂默认）。否则配置仍指向 `ddg` 而没有任何东西注册它，每次搜索都会失败：
+所以**停用或卸载本插件之前，请先删掉 `- id: web` 这两行**（或整行删掉让 DSH 回到出厂默认）。否则配置仍指向 `free-search` 而没有任何东西注册它，每次搜索都会失败：
 
 ```
-Error: configured web provider "ddg" is not registered
+Error: configured web provider "free-search" is not registered
 ```
 
 更早的 DSH（0.1.x）由 patch 静态覆盖 config，不需要也更不该手写这段，这里不再赘述。
@@ -261,7 +261,7 @@ DSH 0.2.1 设置 → 网页搜索 → **DeepSeek 搜索 API** 开关会和本插
 
 > 如果你在 0.1.x 时代按旧文档手写过 `- id: web`，现在可以删掉：0.2.x 由运行时接管写入。手写时注意 `fetchProvider` 应该是 `fs-quality-fetch`（本插件注册的抓取 provider），不是 `http`。
 
-- `searchProvider: ddg` —— 本插件的 **provider id（固定值）**，不是"使用 DuckDuckGo 引擎"；用哪个引擎由设置页的 `provider` 字段决定（`bing`/`baidu`/`auto`/…）。
+- `searchProvider: free-search` —— 本插件的 **provider id（固定值）**，不是"使用 DuckDuckGo 引擎"；用哪个引擎由设置页的 `provider` 字段决定（`bing`/`baidu`/`auto`/…）。
 - `fetchProvider: fs-quality-fetch` —— 本插件的抓取 provider（直接 → exa contents → firecrawl → crawl4ai）。
 - 想改用官方搜索：设置页「抓取」段点「恢复官方搜索」，或**先删掉 `- id: web` 的两行，再在插件管理器里停用本插件**。
 
@@ -895,7 +895,7 @@ dsh web
 
 The plugin **takes over search** once loaded:
 
-- When `web.searchProvider` is unset, or still the shipped default `deepseek-official`, it switches to this plugin's provider (id: `ddg`);
+- When `web.searchProvider` is unset, or still the shipped default `deepseek-official`, it switches to this plugin's provider (id: `free-search`);
 - If you (or another plugin) explicitly selected a different provider, it does not steal it — it only logs a WARN with a copy-pasteable YAML snippet.
 
 **The takeover is persisted into the profile (DSH 0.2.x).** Since `0.2.0-rc.2` the provider selection lives in volatile config refs and can only be written through `settings.mutate("web", …)`, which lands in `profiles/<profile>/cordis.patch.yml` as:
@@ -903,14 +903,14 @@ The plugin **takes over search** once loaded:
 ```yaml
 - id: web
   config:
-    searchProvider: ddg
+    searchProvider: free-search
     fetchProvider: fs-quality-fetch
 ```
 
 So **remove those `- id: web` lines before disabling or uninstalling this plugin** (or delete the whole row and let DSH fall back to its defaults). Otherwise the config still points at `ddg` while nothing registers it, and every search fails with:
 
 ```
-Error: configured web provider "ddg" is not registered
+Error: configured web provider "free-search" is not registered
 ```
 
 Older DSH (0.1.x) used a static patch layer for this; writing that row by hand there is neither needed nor recommended.
@@ -929,7 +929,7 @@ Use `/free-search-engine` or this plugin's settings page to change engines, **no
 
 > If you hand-wrote `- id: web` back in the 0.1.x era, you can drop it now: 0.2.x writes it at runtime. If you do declare it by hand, `fetchProvider` should be `fs-quality-fetch` (the fetch provider this plugin registers), not `http`.
 
-- `searchProvider: ddg` — this plugin's **fixed provider id**, not "use the DuckDuckGo engine"; the engine is chosen by the `provider` field in settings (`bing` / `baidu` / `auto` / …).
+- `searchProvider: free-search` — this plugin's **fixed provider id**, not "use the DuckDuckGo engine"; the engine is chosen by the `provider` field in settings (`bing` / `baidu` / `auto` / …).
 - `fetchProvider: fs-quality-fetch` — this plugin's fetch provider (direct → exa contents → firecrawl → crawl4ai).
 - To go back to official search: click Restore official search in the Fetch section, or **remove those `- id: web` lines first, then disable this plugin** in the plugin manager.
 

@@ -21,7 +21,7 @@ Done in 582ms using pnpm v11.21.0
 
 ### 2. Takeover of the host default search provider
 
-Plugin's bundle patch sets `web.searchProvider = ddg` (this plugin's provider id).
+Plugin's bundle patch sets `web.searchProvider = free-search` (this plugin's provider id).
 
 > **Note (v0.6.7+, issue #51)**: the shipped bundle no longer pins `web.searchProvider`.
 > The plugin takes over at runtime (it registers its provider and switches the id when
@@ -32,7 +32,7 @@ $ dsh --profile web --dump-config
 - id: web
   name: '@deepseek-ai/dsh-web'
   config:
-    searchProvider: ddg
+    searchProvider: free-search
 ```
 
 Before install the host default was `deepseek-official` (see step 5).
@@ -74,7 +74,7 @@ Re-run of the same seam checks against the newest DSH pre-release
 | Check | Result on alpha.1 |
 |-------|-------------------|
 | `dsh plugin add dsh-free-search@0.4.15` (real npm) | installed |
-| `--dump-config` → `web.searchProvider` | `ddg` (takeover works) |
+| `--dump-config` → `web.searchProvider` | `free-search` (takeover works) |
 | settings bridge `POST /api/dsh-free-search-settings/describe` | `ok:true, ns:free-search` |
 | raw search, no API key | `ok:true provider:bing cache:miss sources:2 first:https://deepseek.com/en/index.html` |
 | uninstall → `--dump-config` | `searchProvider` restored to `deepseek-official`; plugin dir removed |
@@ -92,7 +92,7 @@ client-routing contract.
 ## Disclosure
 
 Installing this plugin takes over the host default web search provider
-(`web.searchProvider` → `ddg`, this plugin's provider id); uninstalling
+(`web.searchProvider` → `free-search`, this plugin's provider id); uninstalling
 restores the previous default (verified above). Paid engines
 (Exa/Tavily/Keenable/Perplexity/DeepSeek) require their own API key; free
 engines (Bing/DuckDuckGo/AnySearch/SearXNG) work without any key — the default
