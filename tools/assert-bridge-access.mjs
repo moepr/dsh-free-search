@@ -1,8 +1,9 @@
 // Bridge Host fence (#84): loopback, trusted hosts, public URL, bind address. No network.
 // Node >= 20: node tools/assert-bridge-access.mjs
 import assert from "node:assert/strict";
+import fs from "node:fs";
 
-const { isBridgeRequestAllowed } = await import("../lib/index.js");
+const { isBridgeRequestAllowed, bridgeAuthRejection } = await import("../lib/index.js");
 let checks = 0;
 const check = (name, fn) => { fn(); checks++; console.log(`  ok  ${name}`); };
 
@@ -86,6 +87,39 @@ check("hostnames compare case-insensitively", () => {
     isBridgeRequestAllowed(request({ host: "HARNESS.example.com", remote: "203.0.113.9" }), trust(["harness.example.com"])),
     true
   );
+});
+
+check("the bridge delegates authentication to the host connection service", () => {
+  const req = request({ host: "172.25.0.3:3080", remote: "172.25.0.1", local: "172.25.0.3" });
+  assert.equal(bridgeAuthRejection(req, undefined), 503);
+  assert.equal(bridgeAuthRejection(req, {}), 503);
+  assert.equal(bridgeAuthRejection(req, { requestRejection: () => 401 }), 401);
+  assert.equal(bridgeAuthRejection(req, { requestRejection: () => 403 }), 403);
+  assert.equal(bridgeAuthRejection(req, { requestRejection: () => undefined }), undefined);
+  assert.equal(bridgeAuthRejection(req, { requestRejection: () => { throw new Error("boom"); } }), 503);
+  assert.equal(bridgeAuthRejection(req, { admit: () => ({ peer: { id: "p" } }) }), undefined);
+  assert.equal(bridgeAuthRejection(req, { admit: () => ({ rejection: 401 }) }), 401);
+  assert.equal(bridgeAuthRejection(req, { admit: () => ({ rejection: 403 }) }), 403);
+  assert.equal(bridgeAuthRejection(req, { admit: () => ({ unexpected: true }) }), 503);
+  assert.equal(bridgeAuthRejection(req, { admit: () => { throw new Error("boom"); } }), 503);
+});
+
+check("every bridge handler runs the host-auth guard first", () => {
+  const index = fs.readFileSync(new URL("../lib/index.js", import.meta.url), "utf8");
+  assert.match(index, /bridgeAuthRejection\(req, connection\(\)\)/);
+  assert.match(index, /connectionContext\.get\("connection"\)/);
+  assert.match(index, /ctx\.inject\(\["connection\.authentication"\]/);
+  assert.match(index, /const rejection = bridgeAuthRejection/);
+  assert.equal((index.match(/if \(!guard\(req, res\)\) return;/g) ?? []).length >= 10, true);
+});
+
+check("the settings client resolves bridge URLs against document.baseURI", () => {
+  const client = fs.readFileSync(new URL("../lib/client.js", import.meta.url), "utf8");
+  assert.match(client, /new URL\(`\$\{BRIDGE_PATH\}\/\$\{endpoint\}`, document\.baseURI\)/);
+  assert.doesNotMatch(client, /fetch\(`\/api\/dsh-free-search-settings/);
+  assert.doesNotMatch(client, /BRIDGE_PREFIX/);
+  assert.equal((client.match(/fetch\(bridgeUrl\(/g) ?? []).length >= 8, true);
+  assert.match(client, /async function bridgeRead/);
 });
 
 console.log(`OK: ${checks} bridge access checks passed`);

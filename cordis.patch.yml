@@ -14,8 +14,9 @@
 #
 # NOTE (2026-10, issue #51): this bundle does NOT touch `web.searchProvider`.
 # The plugin takes the search provider over at runtime instead — when the field
-# is unset or still the shipped default (`deepseek-official`) it points it at its
-# own provider id (`free-search`); when another provider was chosen explicitly it leaves
+# is unset or still the shipped default (`deepseek-search-api` since 0.2.2-rc.2,
+# `deepseek-official` on older hosts) it points it at its own provider id
+# (`free-search`); when another provider was chosen explicitly it leaves
 # it alone and only warns.
 #
 # A static `- id: web  config: searchProvider: free-search` used to live here. It was
