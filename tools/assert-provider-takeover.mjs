@@ -1,4 +1,4 @@
-﻿// Provider takeover + registration idempotence across DSH web APIs. No network or API key.
+// Provider takeover + registration idempotence across DSH web APIs. No network or API key.
 // Node >= 20: node tools/assert-provider-takeover.mjs
 import assert from "node:assert/strict";
 import fs from "node:fs";
