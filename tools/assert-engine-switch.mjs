@@ -107,7 +107,10 @@ console.log('\n[6] 真实 patch 文件只读校验');
   if (fs.existsSync(real)) {
     const text = fs.readFileSync(real, 'utf8');
     const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/);
-    check(countLegacyWebRows(lines) === 1, '真实 patch 里 - id: web 只有 1 个', `实际 ${countLegacyWebRows(lines)}`);
+    // 0.9.73+：provider 接管写内存 volatile ref，不再落盘 `- id: web`。
+    // 0 = 由切换器（web-search-switcher）管理钉选；1 = patch 钉选。两者都合法，>1 才是残留错误。
+    const webRows = countLegacyWebRows(lines);
+    check(webRows <= 1, '真实 patch 里 - id: web 至多 1 个（0 = 切换器管理）', `实际 ${webRows}`);
     const block = findEntryBlock(lines);
     check(block !== null, '真实 patch 里能找到 web-search-free 条目');
     if (block) {

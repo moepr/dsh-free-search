@@ -34,7 +34,7 @@
 #### 引擎与切换
 
 - **零成本** —— 多个免费引擎，无需 key、无需注册
-- **42 个引擎可选**：DuckDuckGo（html/lite）、Bing、SearXNG（元搜索，支持自定义实例）、AnySearch、Exa、Tavily、Keenable、Firecrawl、Parallel、Brave（`brave`，官方 Search API，需 `BRAVE_API_KEY`）、智谱（`zhipu`，官方 Web Search API，需 `ZHIPU_API_KEY`）、Perplexity、SerpBase、Serply、Outcrawl、SpecStream（`specstream`，官方 Search API，需 `SPECSTREAM_API_KEY`）、Google 自定义搜索（`google`，需 API key + CSE ID）、秘塔搜索（`metaso`，官方 API，按点数计费）、Yandex 搜索（`yandex`，官方 API，按请求计费，需 folder ID）、腾讯元宝搜索（`yuanbao`，API key 网关，有活动免费额度）、DeepSeek 官方、DeepSeek 原生搜索 API、You.com、百度千帆、Kimi、阿里云百炼、火山联网搜索（豆包搜索）、知乎全网/站内（`zhihu_global`/`zhihu_site`，经知乎开放平台 MCP）、Antigravity CLI 搜索（`agy`，需本机安装）、OpenAI / Gemini / Claude 模型内置搜索。默认自动回退链覆盖其中 30 个；5 个 HTML SERP 引擎默认不参与，OpenAI / Gemini / Claude 三个模型引擎、Metaso、Yandex、Yuanbao 和 SpecStream 都只在显式点名时运行。
+- **43 个引擎可选**：DuckDuckGo（html/lite）、Bing、SearXNG（元搜索，支持自定义实例）、AnySearch、Exa、Tavily、Keenable、Firecrawl、Parallel、Brave（`brave`，官方 Search API，需 `BRAVE_API_KEY`）、智谱（`zhipu`，官方 Web Search API，需 `ZHIPU_API_KEY`）、Perplexity、SerpBase、Serply、Outcrawl、SpecStream（`specstream`，官方 Search API，需 `SPECSTREAM_API_KEY`）、Google 自定义搜索（`google`，需 API key + CSE ID）、秘塔搜索（`metaso`，官方 API，按点数计费）、Yandex 搜索（`yandex`，官方 API，按请求计费，需 folder ID）、腾讯元宝搜索（`yuanbao`，API key 网关，有活动免费额度）、DeepSeek 官方、DeepSeek 原生搜索 API、You.com、百度千帆、Kimi、阿里云百炼、火山联网搜索（豆包搜索）、知乎全网/站内（`zhihu_global`/`zhihu_site`，经知乎开放平台 MCP）、Antigravity CLI 搜索（`agy`，需本机安装）、OpenAI / Gemini / Claude 模型内置搜索。默认自动回退链覆盖其中 30 个；5 个 HTML SERP 引擎默认不参与，OpenAI / Gemini / Claude 三个模型引擎、Metaso、Yandex、Yuanbao 和 SpecStream 都只在显式点名时运行。
 - **5 个 HTML 搜索页引擎（默认关闭）** —— 把传统搜索页并入同一套引擎 / 回退 / 冷却 / 设置体系：`baidu-html`（百度网页）、`so360`、`sogou`、`wechat`（微信文章）、`toutiao`。免 key、免额度，代价是抓页面：验证码/反爬按 `bot-wall` 归类并让整个家族冷却 10 分钟（整段出口 IP 都会被打标），结果也没有 API 摘要。它们默认不进 auto / 回退链 / 语言池，只在显式 `engine=` 或加入语言池时运行。
 - **启用引擎白名单** —— 插件只维护一份 `allowedEngines` 启用列表；未勾选的引擎从所有搜索链、Auto / Multi 路由、引擎测试和提示词中移除。升级新增的引擎默认不启用，需要手动勾选。
 - **全局引擎开关与回退优先级** —— 设置页可勾选/取消引擎（取消后全局生效：普通搜索 / Auto / `advanced_search` / `multi_search` / 引擎测试都不再用它），回退链支持添加、删除与 ↑↓ 拖动排序（一键恢复默认）。
@@ -151,6 +151,7 @@ alt="提示词四段：状态 / 工具 / 约束 / 结果展示"
 | `agy` | Antigravity CLI | 免费 | 是（需 CLI） | 需本机安装 [Antigravity](https://antigravity.google) 并登录，插件通过 `agy -p` 调用；免 key、免额度，默认在引擎列表里，没装 CLI 时自动跳过 |
 | `perplexity` | Perplexity | 付费 | 否 | 需 `PERPLEXITY_API_KEY` |
 | `serpbase` | SerpBase | 付费 | 否 | 需 `SERPBASE_API_KEY`（serpbase.dev，注册送 100 次免费额度） |
+| `serper` | Serper.dev | 付费 | 是 | 需 `SERPER_API_KEY`（serper.dev，注册送 2,500 次免费额度）；`X-API-KEY` 鉴权，时间过滤走 Google `tbs` |
 | `serply` | Serply | 付费 | 否 | 需 `SERPLY_API_KEY`（serply.io，新账户 30 天内 2,500 次免费额度）；Google 网页结果，按设置页语言本地化 |
 | `outcrawl` | Outcrawl | 付费 | 否 | 需 `OUTCRAWL_API_KEY`（outcrawl.ai，每月 1,000 credits 免费额度）；网页搜索结果（标题/链接/摘要），单次最多 20 条 |
 | `google` | Google 自定义搜索 | 免费额度 | 否 | 需 `GOOGLE_CSE_API_KEY` 和 Programmable Search Engine ID（`googleCseId` / cx）；Google 官方 Custom Search JSON API，每天 100 次免费，按次计费超额；支持 `hl`、安全搜索和 `dateRestrict` 时间过滤 |
@@ -298,7 +299,7 @@ DSH 0.2.1 设置 → 网页搜索 → **DeepSeek 搜索 API** 开关会和本插
 - **Test engine**：直测当前引擎可用性（不走回退链，付费引擎无 key 会明确报错）
 - **Use Bing default**：把当前搜索引擎切回稳定的免费 Bing；`Discard` 只撤销尚未保存的编辑
 - **Platform search**：勾选启用 GitHub / V2EX / Bilibili / Reddit / Hacker News / Stack Overflow / 维基百科 / npm / YouTube / Vimeo / 掘金 / 豆瓣 / Qiita / X (Twitter) 平台搜索（`platform_search` 工具按此过滤）
-- **EN / 中文**：切换界面语言（默认中文）
+- **界面语言 / Interface language**：选择「跟随应用 / Follow app」、English 或中文。默认（`uiLang` 未设置、空字符串或 `auto`）实时跟随 DSH 当前界面语言；已有 `en` / `zh` 设置继续固定语言。卡片预览不丢失未保存编辑，保存后侧栏、插件摘要和斜杠命令文案使用该设置，撤销则恢复已保存值。界面文案只有中英两套（其它语言回落英文），标题保留已有多语言翻译。旧宿主没有 locale 服务时回落浏览器语言，再回落英文；服务稍后可用时自动接入。不会修改搜索 `lang`、Bing 市场、provider 或提示词语言。
 
 <table align="center" style="border: none; border-collapse: collapse;">
   <tr style="border: none;">
@@ -330,6 +331,7 @@ DSH 0.2.1 设置 → 网页搜索 → **DeepSeek 搜索 API** 开关会和本插
 设置页有这些块（都会保存进条目 config）：
 
 - **全局启用的搜索引擎（n/m）**：`n` 是已勾选数量、`m` 是当前版本引擎总数（不含 Auto / Multi），标题会随勾选实时变化。这就是启用白名单本身，勾选即启用、取消即禁用；未启用的引擎会从普通 `web_search` 回退链、Auto 智能路由、`advanced_search`、`multi_search` 和引擎测试中**全局排除**。至少要保留一个引擎，新版本新增的引擎默认不启用。
+- **按次计费引擎入池（#152）**：语言池默认只接受普通引擎，按次计费的 7 个引擎（OpenAI / Gemini / Claude / Metaso / Yandex / Yuanbao / SpecStream）既不出现也不生效。设置页可切三档：`off`（默认，保持现状）/ `auto`（只允许 Auto 路由使用，每次最多挑一个、计费一次）/ `multi`（Auto 与 Multi 都允许，Multi 会并发整池，每次搜索每个引擎各计费一次）。非 `off` 档会显示按次计费提示。
 - **全局回退优先级**：用 ↑↓ 调整先后顺序，下方的下拉框可以把**任意引擎**（含 HTML 家族和按次计费的 OpenAI / Gemini / Claude / Metaso / Yandex / Yuanbao / SpecStream）加进链里，每行右侧的 − 可以移出（至少保留一个）。已保存的顺序就是权威链，删掉的引擎不会被默认链自动补回。首选引擎仍先尝试；Auto 保留"语言/时间"路由规则，但自定义后同一分组内及后续回退按此顺序。被禁用的引擎保留在列表里（标记「已禁用」）但不执行；「恢复默认顺序」一键还原。
 - **中文查询池（zhPool）/ 英文查询池（enPool）**：Auto 路由的起始组，也是 Multi 模式的并发池。按查询语言自动二选一（检测到中日韩文字走中文池，其余走英文池）；两池都可用 ↑↓ 排序、下拉添加引擎、「−」移除（**每池最低 2 个引擎，无上限**）。默认中文池 `bing / baidu / aliyun / anysearch`，默认英文池 `bing / exa / tavily`；禁用/冷却/缺 key 的引擎运行时自动跳过。
 - **搜索引擎下拉里的 `Multi Search`**：选中后 `web_search` 会并发查询**查询语言对应池的全部**已启用引擎（不再是前 3 个），URL 去重合并、跨源命中的结果排前面。注意整池并发会成倍消耗额度（池里含按额度计费引擎时尤其注意）；Multi 失败时会自动退回普通单引擎回退链并在结果里注明。
@@ -400,7 +402,7 @@ lang: zh                    # 搜索语言池/本地化（zh / en / ru …，不
 #   我们自己渲染的文案只有中文/英文两套，其它语言（ja/ru/de…）一律走英文，避免回答前先塞一段中文（#92）；
 #   weather 例外，另有日文（ja 得到日文天气，ru/de… 仍走英文）。
 #   web_fetch（fs-quality-fetch）的 Accept-Language 同样跟随 lang，不再固定中文（#92）。
-uiLang: zh                  # 设置页界面语言（zh / en）；留空则跟随 lang
+uiLang: ""                  # 界面语言（zh / en）；未设置、空字符串或 auto 跟随 DSH 界面语言
 promptLanguage: en          # 注入给模型的系统提示词与工具描述语言（en / zh）；只翻叙述文字，工具名/参数/枚举保持英文
 # 提示词分四段：状态 / 工具 / 约束 / 结果展示。每段页 1 是内置英文、页 2 是内置中文（都不入盘），页 3 起是你写的。
 promptStatePages: []
@@ -640,7 +642,7 @@ npx -y -p dsh-free-search dsh-free-search-mcp
 
 #### 离线自检断言（tools/）
 
-仓库自带 **79 个**零依赖断言脚本（合计 **1117 项**）
+仓库自带 **87 个**零依赖断言脚本（合计 **1178 项**）
 
 | 脚本 | 覆盖 | 运行（项数） |
 |---|---|---|
@@ -651,7 +653,7 @@ npx -y -p dsh-free-search dsh-free-search-mcp
 | `assert-multi-policy.mjs` | multi 执行策略：并发上限是天花板 / 目标成功源非硬下限 / 凭据资格在上限之前分流 / **Fast·Balanced·Deep 档位** | `node tools/assert-multi-policy.mjs`（146） |
 | `assert-multi-limit.mjs` | multi 结果上限（#109）：默认 20 / 硬上限 100 / 配置归一化、单次 maxResults 受上限约束、工具参数与本段提示词写明生效上限、设置页字段与保存 | `node tools/assert-multi-limit.mjs`（6） |
 | `assert-maintenance.mjs` | 维护面：CI 在 Node 20/22/24 跑全部断言并过打包闸门、发布脚本会 bump / 校验 / 打 tag / 可发布、恢复官方 provider 的桥接与设置页按钮 | `node tools/assert-maintenance.mjs`（4） |
-| `assert-engine-modules.mjs` | 引擎分层：实现文件存在且被 index 引用、引擎函数已迁出 index、设置页引擎 id 与服务端清单一致、清单覆盖 42 个引擎且免费/按次标记正确、index 不引用引擎私有名 | `node tools/assert-engine-modules.mjs`（6） |
+| `assert-engine-modules.mjs` | 引擎分层：实现文件存在且被 index 引用、引擎函数已迁出 index、设置页引擎 id 与服务端清单一致、清单覆盖 43 个引擎且免费/按次标记正确、index 不引用引擎私有名 | `node tools/assert-engine-modules.mjs`（6） |
 | `assert-brave.mjs` | Brave Search：catalog/凭据/设置接线、请求头与 count/freshness、错误分类、HTML 清洗、ISO 日期归一化、15s 超时 | `node tools/assert-brave.mjs`（54） |
 | `assert-sidebar-entry.mjs` | 侧栏入口（#129）：`sidebarEntry` 默认开、设置页读写、条件注册/注销、`/free-search` 命令打开面板 | `node tools/assert-sidebar-entry.mjs`（4） |
 | `assert-slash-commands.mjs` | 斜杠命令开关：`slashCommands` 默认开、设置页读写、两个命令按配置注册/注销、关闭后提示词不再提 `/free-search-engine` | `node tools/assert-slash-commands.mjs`（4） |
@@ -675,6 +677,14 @@ npx -y -p dsh-free-search dsh-free-search-mcp
 | `assert-fallback-order.mjs` | 回退链可编辑：空白顺序仍取默认链、已保存顺序保持删除结果、默认链不混入 HTML 家族、HTML 与按次计费引擎都能显式加入、`hasCustomFallbackOrder` 只认真实编辑、`enabledEngines` 不把白名单引擎追加进自定义链、Auto 只在链内路由、设置页默认链与增删控件接线 | `node tools/assert-fallback-order.mjs`（11） |
 `node tools/assert-prompt-display.mjs`（9）
 | `assert-prompt-pager.mjs` | 提示词分页可保存：翻页（‹ / ›）会置 dirty 并清掉旧的失败提示、增删页同样置 dirty、保存按钮仍由 dirty 控制 | `node tools/assert-prompt-pager.mjs`（5） |
+| `assert-ui-locale.mjs` | 界面语言跟随宿主 locale（#150）：`uiLang` 为空 / `auto` / 大小写变体都跟随实时切换、显式 en/zh/EN-us/zh_TW 锁定不动、草稿/撤销/保存不改搜索与提示词设置、斜杠命令只写 provider、缺 locale 服务与旧宿主 `getLocale` + disposer 清理、rail 与引擎设置无 React key 警告 | `node tools/assert-ui-locale.mjs`（19） |
+| `assert-serper.mjs` | Serper.dev 引擎（#157）：端点常量、`X-API-KEY` 鉴权（非 Bearer）、`num` 上限 100、`tbs` 时间语法（含绝对日期 `cd_min`）、`organic` 映射、401/403/429 错误分类、缺 key 快速失败、catalog 与 MCP/设置页接线 | `node tools/assert-serper.mjs`（10） |
+| `assert-tavily-endpoint.mjs` | Tavily 兼容端点（#153）：留空 = 官方地址、base 自动补 `/search`、query/hash 被剥离、非 http(s) 拒绝、key 只走 Authorization 头、401 点名端点、配置与设置页接线 | `node tools/assert-tavily-endpoint.mjs`（8） |
+| `assert-multikey-ui.mjs` | 多 key 输入（#154）：后端支持换行/逗号/分号分隔、设置页为 textarea 而非单行密码框、提示写明格式与轮换顺序 | `node tools/assert-multikey-ui.mjs`（4） |
+| `assert-pool-policy.mjs` | 按次计费引擎入池（#152）：7 个引擎全覆盖、策略归一化（含大小写与非法值）、`off` 保持现状、`auto`/`multi` 放行、Auto 可把按次计费引擎排到首位、`off` 写进池也不生效、策略进入缓存键 | `node tools/assert-pool-policy.mjs`（9） |
+| `assert-pool-prompt.mjs` | 入池策略与提示词一致（#152）：`off` 保留「只在显式选择时运行」、`auto` 改写为「最多一个、计费一次」、`multi` 改写为「每个引擎各计费一次」、Multi 池只在 `multi` 档列出按次计费引擎、中文文案同步 | `node tools/assert-pool-prompt.mjs`（5） |
+| `assert-fetch-ssrf-wiring.mjs` | #156 回归：`lib/index.js` 必须以 provider 自己的选项名 `allowedCidrs` 传白名单（写成 `allowFakeIpCidrs` 会被静默丢弃）、白名单能到达 `validateUrl`、错拼的键回退为空列表 | `node tools/assert-fetch-ssrf-wiring.mjs`（3） |
+| `assert-rail-keys.mjs` | 侧栏目录的渲染 key：每项圆点与文字两个子元素都必须带稳定 key，避免 React 在每次渲染时报 unique key 警告 | `node tools/assert-rail-keys.mjs`（3） |
 | `assert-mcp-response-cap.mjs` | #147 MCP stdio 单条响应上限：字符/字节双上限默认值与环境覆盖、0 关闭、多字节文本不超 64KB 行、handler 对结果与错误统一截断、web_fetch 先按上限收缩、research 文档按剩余预算均分 | `node tools/assert-mcp-response-cap.mjs`（12） |
 | `assert-fetch-ssrf.mjs` | 抓取 SSRF 防护：公网/私网/保留地址判定、DNS 解析到私网拒绝、localhost 与 IP 字面量拒绝、`http://` 与 `https://` 放行而其他协议与带凭据 URL 拒绝、http 目标解析到私网同样拒绝、fake-ip 网段默认拒绝且仅按配置放行、IPv6 ULA 显式放行、放行后仍拒绝回环/IPv4 私网/链路本地、provider 接线与设置项 | `node tools/assert-fetch-ssrf.mjs`（10） |
 | `assert-fetch-http.mjs` | 明文 http 目标（#143）：直连层按协议选 transport、http 重定向可跟随、provider 不再在入口拒绝 http 而交给 tier 链、全层失败报直连原因而不再报 only https、非 http(s) 协议仍拒、`agentForUrl` 为 http 目标选明文隧道 agent、经 `CONNECT` 隧道抓取 http 页面 | `node tools/assert-fetch-http.mjs`（7） |
@@ -787,7 +797,7 @@ This plugin solves exactly that: multiple free engines plus automatic fallback, 
 #### Engines and switching
 
 - **Zero Cost** — Multiple free engines with no API key or registration required
-- **42 engines available** — DuckDuckGo (HTML / Lite), Bing, AnySearch AI, SearXNG (meta-search with custom instances), Exa, Tavily, Keenable, Firecrawl, Parallel, Brave (`brave`, official Search API, needs `BRAVE_API_KEY`), Zhipu (`zhipu`, official Web Search API, needs `ZHIPU_API_KEY`), Perplexity, SerpBase, Serply, Outcrawl, SpecStream (`specstream`, official Search API, needs `SPECSTREAM_API_KEY`), Google Programmable Search (`google`, needs an API key plus a CSE ID), Metaso (秘塔搜索, official API, billed per call), Yandex Search (official API, billed per request, folder ID required), Tencent Yuanbao Search (API-key gateway with a limited free-quota activity), DeepSeek Official, DeepSeek Native Search API, You.com, Baidu Qianfan, Kimi, Aliyun Bailian, Volcano Doubao, Zhihu web-wide/site search (`zhihu_global`/`zhihu_site`, via the Zhihu open-platform MCP), Antigravity CLI search (`agy`, requires the local CLI), and the model-based OpenAI / Gemini / Claude searches. The default auto-fallback chain covers 30 of them; the 5 HTML SERP engines stay out by default and the per-call billed OpenAI / Gemini / Claude engines, Metaso, Yandex, Yuanbao and SpecStream run only when explicitly named.
+- **43 engines available** — DuckDuckGo (HTML / Lite), Bing, AnySearch AI, SearXNG (meta-search with custom instances), Exa, Tavily, Keenable, Firecrawl, Parallel, Brave (`brave`, official Search API, needs `BRAVE_API_KEY`), Zhipu (`zhipu`, official Web Search API, needs `ZHIPU_API_KEY`), Perplexity, SerpBase, Serply, Outcrawl, SpecStream (`specstream`, official Search API, needs `SPECSTREAM_API_KEY`), Google Programmable Search (`google`, needs an API key plus a CSE ID), Metaso (秘塔搜索, official API, billed per call), Yandex Search (official API, billed per request, folder ID required), Tencent Yuanbao Search (API-key gateway with a limited free-quota activity), DeepSeek Official, DeepSeek Native Search API, You.com, Baidu Qianfan, Kimi, Aliyun Bailian, Volcano Doubao, Zhihu web-wide/site search (`zhihu_global`/`zhihu_site`, via the Zhihu open-platform MCP), Antigravity CLI search (`agy`, requires the local CLI), and the model-based OpenAI / Gemini / Claude searches. The default auto-fallback chain covers 30 of them; the 5 HTML SERP engines stay out by default and the per-call billed OpenAI / Gemini / Claude engines, Metaso, Yandex, Yuanbao and SpecStream run only when explicitly named.
 - **5 HTML SERP engines (off by default)** — Traditional result pages join the same engine / fallback / cooldown / settings machinery: `baidu-html` (Baidu web), `so360`, `sogou`, `wechat` (WeChat articles) and `toutiao`. No key, no quota — the trade-off is scraping: captcha/anti-bot pages are classified as `bot-wall` and cool the whole family down for 10 minutes (the egress IP gets flagged as a whole), and results carry no API snippets. They never join auto routing, the fallback chain or the language pools; they only run when named via `engine=` or added to a pool.
 - **Engine allowlist** — the plugin keeps a single `allowedEngines` enable list. Unchecked engines are removed from every search chain, Auto / Multi routing, engine tests and prompts. Engines added by later versions stay off until checked.
 - **Global engine enable list & fallback priority** — the checklist is the allowlist itself: checked engines run, unchecked engines are excluded everywhere (web_search fallback, Auto routing, advanced_search, multi_search, engine tests). Engines added by later versions stay off. Reorder the global fallback chain with ↑↓ (one-click reset).
@@ -905,6 +915,7 @@ If this plugin has been helpful, a ⭐ on [GitHub](https://github.com/DDDMUC/dsh
 | `agy` | Antigravity CLI | Free | Yes (CLI) | Requires the [Antigravity](https://antigravity.google) CLI installed and signed in; invoked as `agy -p`, no key and no quota, enabled by default and skipped automatically when the CLI is absent |
 | `perplexity` | Perplexity | Paid | No | Requires `PERPLEXITY_API_KEY` |
 | `serpbase` | SerpBase | Paid | No | Requires `SERPBASE_API_KEY` (serpbase.dev, 100 free queries on signup) |
+| `serper` | Serper.dev | Paid | Yes | Requires `SERPER_API_KEY` (serper.dev, 2,500 free queries on signup); `X-API-KEY` auth, time filtering via Google `tbs` |
 | `serply` | Serply | Paid | No | Requires `SERPLY_API_KEY` (serply.io, 2,500 free credits for the first 30 days); Google web results localized to the settings language |
 | `outcrawl` | Outcrawl | Paid | No | Requires `OUTCRAWL_API_KEY` (outcrawl.ai, free tier of 1,000 credits a month); web results with title, URL and snippet, up to 20 per search |
 | `google` | Google Programmable Search | Free quota | No | Requires `GOOGLE_CSE_API_KEY` and a Programmable Search Engine ID (`googleCseId` / cx); official Custom Search JSON API, 100 free queries/day then billed; supports `hl`, safe search and `dateRestrict` time filtering |
@@ -1053,7 +1064,9 @@ The config page provides:
 - **Test engine**: Tests the selected engine directly (no fallback chain; paid engines without a key report an explicit error).
 - **Use Bing default**: stage a switch back to the stable free Bing engine; `Discard` only cancels unsaved edits
 - **Platform search**: check platforms (GitHub / V2EX / Bilibili / Reddit / HN / Stack Overflow / Wikipedia / npm / YouTube / Vimeo / Juejin / Douban / Qiita / X (Twitter)) to enable them for the `platform_search` tool (unchecked platforms are skipped, and X needs Grok Build signed in).
-- **EN / 中文**: toggle the interface language (default Chinese).
+- **Interface language**: choose Follow app, English, or 中文. Missing, empty, or `auto` `uiLang` follows the current DSH locale reactively; explicit `en` / `zh` stays fixed. Unsaved choices preview in the card; saving updates the sidebar, summaries, and slash commands, while Discard restores the saved choice. UI copy falls back to English for other languages, retaining the existing translated panel titles. Older hosts without a locale service use the browser language, then English. Search `lang`, Bing market, provider, and prompt language remain independent.
+
+Locale regression fixture: `node tools/assert-ui-locale.mjs` renders the exported client bundle against offline settings and host-locale fixtures; it makes no provider requests.
 
 <table align="center" style="border: none; border-collapse: collapse;">
   <tr style="border: none;">
@@ -1155,7 +1168,7 @@ lang: zh                    # search language pools / localization (zh / en / ru
 #   text this plugin renders itself only exists in Chinese and English, so other languages (ja/ru/de…) get English rather than a wall of Chinese (#92);
 #   weather also has Japanese (ja gets Japanese weather text, ru/de… still get English).
 #   web_fetch (fs-quality-fetch) sends the same Accept-Language instead of a fixed Chinese one (#92).
-uiLang: zh                  # settings UI language (zh / en); empty = follow lang
+uiLang: ""                  # UI language (zh / en); missing, empty or auto = follow DSH locale
 promptLanguage: en          # language of the system prompt section and tool descriptions (en / zh); prose only - tool names, params and enums stay English
 # The prompt has three segments: state, tools, constraints. In each one page 1 is the
 # built-in English page and page 2 the built-in Chinese one (neither is stored);
@@ -1391,7 +1404,7 @@ Restart `dsh web` after switching to apply changes.
 
 #### Offline self-check assertions (`tools/`)
 
-**Seventy-nine** zero-dependency assertion scripts ship with the repo (**1117 assertions** total)
+**Eighty-seven** zero-dependency assertion scripts ship with the repo (**1178 assertions** total)
 
 | Script | Covers | Run (count) |
 |---|---|---|
