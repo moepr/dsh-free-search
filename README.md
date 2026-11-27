@@ -422,7 +422,7 @@ fetchProviderForce: false # true = 连 DSH 搜索开关写进来的 deepseek-fet
 browserFetch: true           # 直连失败时用系统浏览器无头渲染
 allowFakeIpCidrs: []          # 显式放行的保留网段，例如 Clash/mihomo fake-ip 的 198.18.0.0/15
 fetchPrefer: exa             # exa | firecrawl —— 两者都失败后先试哪个 keyed 抓取层
-deepseekFetchBaseUrl: ""    # 可选：自定义 DeepSeek 兼容抓取端点（…/fetch），留空不启用；失败自动回落直连 / exa / firecrawl
+deepseekFetchBaseUrl: ""    # 可选：DeepSeek 抓取端点。官方填 https://api.deepseek.com/v1/tools（代码补 /fetch；只写 https://api.deepseek.com 也会自动补成官方路径）；自建网关填 http://127.0.0.1:3000/v1 或完整 …/fetch。留空不启用；失败自动回落直连 / exa / firecrawl
 deepseekFetchApiKey: ...     # 可选：只给这个抓取端点用；留空依次复用工具 key、DEEPSEEK_API_KEY
 region: cn-zh               # DuckDuckGo 区域（可选）
 searxngInstances:           # 自定义 SearXNG 实例（可选）
@@ -642,7 +642,7 @@ npx -y -p dsh-free-search dsh-free-search-mcp
 
 #### 离线自检断言（tools/）
 
-仓库自带 **87 个**零依赖断言脚本（合计 **1178 项**）
+仓库自带 **123 个**零依赖断言脚本（合计 **1525 项**）
 
 | 脚本 | 覆盖 | 运行（项数） |
 |---|---|---|
@@ -660,6 +660,7 @@ npx -y -p dsh-free-search dsh-free-search-mcp
 | `assert-keyless-first.mjs` | 免 key 优先：`keylessFirst` 默认关、开启后先走免 key 档，限流/鉴权/网络失败改用 key 并休息、其他失败不动用 key、无 key 行为不变，覆盖 Tavily、Exa 与 multi 模式 | `node tools/assert-keyless-first.mjs`（13） |
 | `assert-zhipu.mjs` | 智谱搜索：catalog/回退链、请求头与 engine/count/recency、Sogou 步进、响应映射、错误分类、无 key | `node tools/assert-zhipu.mjs`（6） |
 | `assert-deepseek-snippets.mjs` | deepseek-tools 摘要：默认 600、0 不截断、总预算上限、短条目保留 | `node tools/assert-deepseek-snippets.mjs`（5） |
+| `assert-deepseek-quality.mjs` | deepseek-tools 质量信号（#165）：`rerank_score`/`authority` 透传为 `score`/`authority`、官方 `site_name` 与兼容网关的 `site` 都认、`authority = -1`（未知）保留、缺失评分与 0 分可区分、`minScore` 默认不过滤、按分数裁在去重之后与条数之前、过滤到空时给出说明、空响应不产生说明、配置项与两处调用接线、设置页钳制到 0~3、工具 schema 同步声明新字段（`additionalProperties:false` 否则判非法）、合并保持字段、MCP 侧读环境变量、两处渲染都收成两位小数 | `node tools/assert-deepseek-quality.mjs`（16） |
 | `assert-deepseek-official.mjs` | DeepSeek Official：Anthropic Messages + deepseek_web_search、title/snippet/site_name/page_age 映射、citation 回退、源码守卫 | `node tools/assert-deepseek-official.mjs`（4） |
 | `assert-bing-relevance.mjs` | Bing 相关性（#112）：单字中文 token 被剔除、无关替代 SERP 被拒、真正相关的结果通过、只命中通用引擎名的整批被拒、单一 token 覆盖一半时放行、单字/纯数字查询的显式行为 | `node tools/assert-bing-relevance.mjs`（6） |
 | `assert-relevance-pools.mjs` | 相关性守卫与语言池（#132/#133）：AnySearch 无关批次判空、相关批次保留、shared.js 守卫被 anysearch/searxng/ddg/ddg-lite/degoog/keenable 使用、doctor 地区默认文案与语言池告警、缓存 key 随 zhPool/enPool 变化 | `node tools/assert-relevance-pools.mjs`（5） |
@@ -678,14 +679,49 @@ npx -y -p dsh-free-search dsh-free-search-mcp
 `node tools/assert-prompt-display.mjs`（9）
 | `assert-prompt-pager.mjs` | 提示词分页可保存：翻页（‹ / ›）会置 dirty 并清掉旧的失败提示、增删页同样置 dirty、保存按钮仍由 dirty 控制 | `node tools/assert-prompt-pager.mjs`（5） |
 | `assert-ui-locale.mjs` | 界面语言跟随宿主 locale（#150）：`uiLang` 为空 / `auto` / 大小写变体都跟随实时切换、显式 en/zh/EN-us/zh_TW 锁定不动、草稿/撤销/保存不改搜索与提示词设置、斜杠命令只写 provider、缺 locale 服务与旧宿主 `getLocale` + disposer 清理、rail 与引擎设置无 React key 警告 | `node tools/assert-ui-locale.mjs`（19） |
+| `assert-engine-settings-ids.mjs` | 设置按钮可达性（#153 回归）：`ENGINE_SETTINGS_IDS` 必须包含所有写了 `renderEngineSettings` 分支的引擎，按钮仍由该列表控制 | `node tools/assert-engine-settings-ids.mjs`（3） |
 | `assert-serper.mjs` | Serper.dev 引擎（#157）：端点常量、`X-API-KEY` 鉴权（非 Bearer）、`num` 上限 100、`tbs` 时间语法（含绝对日期 `cd_min`）、`organic` 映射、401/403/429 错误分类、缺 key 快速失败、catalog 与 MCP/设置页接线 | `node tools/assert-serper.mjs`（10） |
 | `assert-tavily-endpoint.mjs` | Tavily 兼容端点（#153）：留空 = 官方地址、base 自动补 `/search`、query/hash 被剥离、非 http(s) 拒绝、key 只走 Authorization 头、401 点名端点、配置与设置页接线 | `node tools/assert-tavily-endpoint.mjs`（8） |
+| `assert-hint-card.mjs` | 长说明挂悬停卡片（`HintCard`），不留在字段下面当内联段落：18 个已转换字段逐个核对「只被引用一次、确实在 `<HintCard>` 里、不再有 `<p className="dshfs-hint">`」；Key 存储位置那种随下拉变化的说明也算（两种取值都进卡片）。另加卡片本身的行为契约——portaled 到 `document.body`、fixed 定位且不越视口、悬停 150ms 开、Escape 关、focus 开、blur 关、触屏点按、图标按钮不连动外层复选框 | `node tools/assert-hint-card.mjs`（28） |
+| `assert-field-row.mjs` | 单行字段排布：界面语言用 `fieldRow` 而不是独占一列、单行下拉不再撑满整行、密钥存储保持同一形态 | `node tools/assert-field-row.mjs`（3） |
+| `assert-tool-detail-preview.mjs` | 工具行「详情」展开区（只读预览）：内联文案覆盖 9 个工具 × 2 种语言、与服务端 `prompt_i18n` 的 description/参数说明逐字一致、预览不进提示词注入、展开状态是纯界面状态（不置 dirty、不写配置） | `node tools/assert-tool-detail-preview.mjs`（6） |
+| `assert-segment-hint.mjs` | 分页编辑器说明的位置："第 1 页和第 2 页无法编辑和删除"挂在三个段标题的悬停卡片上、不再是悬在三段上方的独立段落、工具段（无内置页）不带这句话、中英文案原样保留 | `node tools/assert-segment-hint.mjs`（4） |
+| `assert-load-path.mjs` | 设置页加载路径：打开只读一次配置（卡片复用同一 promise）、写操作后绕过缓存重新读、describe 不再回传 schema（客户端从不读，8.9KB 冗余）、凭据状态一次并发而非 32 次串行 | `node tools/assert-load-path.mjs`（4） |
+| `assert-runtime-copy.mjs` | 运行时输出面板的每一条文字都从 `lib/` 源码抽取（`tools/lib/extract-runtime-copy.mjs`），再与 `client.js` 的内联副本双向逐字比对：置信度说明、回退 Note 模板、输出外壳（含工具名与 weather 三种语言表头）、空结果占位、`<untrusted-web-content>` 边界；`Confidence` 与空占位不许混进外壳；四类文字各自成段（不是一个块），只有置信度段带中/EN；位置描述必须是「结果列表之后」；改源码后忘重跑 `tools/gen-runtime-copy.mjs` 会直接失败 | `node tools/assert-runtime-copy.mjs`（9）；重生成用 `node tools/gen-runtime-copy.mjs` |
+| `assert-tool-language.mjs` | 工具侧文字的语言（「提示词语言」下拉删除后的接手者）：`toolLanguageOf` 是唯一来源（显式 `promptToolsLang` > `uiLang` > en）、六处工具注册全部改用它、工具段摘要与运行时文案同源、客户端预览与服务端同一规则、界面已无该下拉但字段仍可读且客户端不再覆写 | `node tools/assert-tool-language.mjs`（5） |
+| `assert-external-engines.mjs` | 外部引擎扩展点的发现与隔离：`dsh.freeSearch` 标记的包被发现、无标记的忽略、scope 目录展开而 `.pnpm`/隐藏目录跳过、`apiVersion` 必须是 1、id 撞内置或撞另一个外部包一律拒绝、`auto`/`multi` 不算引擎、入口不得越出包目录、import 抛错只记失败不中断扫描、坏结果形状返回 `null`、注入的上下文不含 `cfg`/`settings`/凭据中心 | `node tools/assert-external-engines.mjs`（16） |
+| `assert-external-wiring.mjs` | 外部引擎在 `lib/index.js` 的接线：43 个内置引擎常量一个不改、外部 id 未注册前不算已知引擎、注册后能过白名单/禁用集/回退链/语言池四处校验、默认启用集与默认回退链都不含它、Auto 路由只在自定义链点名时才用它、`time` 决定时间过滤时是否排到前面、`describe` 回传清单、判据只剩 `isKnownEngine`/`isTimeEngine` 两处原始常量、runner 只解析自己声明的凭据并用 `proxyFetch` | `node tools/assert-external-wiring.mjs`（15） |
+| `assert-webz-engine.mjs` | 第一个可选引擎包（Webz.io News Search）：`apiVersion`/`id`/`time`/`requiresKey` 契约、相对与绝对时间都换算成毫秒 `ts`、31 天边界决定是否带 `allowNewsHistory`、`size` 夹在 1–100、token 只走 Bearer 头不进 URL、`posts[]` → `sources[]` 字段映射、坏 JSON/缺 `posts`/401/402/429/400 的报错文案 | `node tools/assert-webz-engine.mjs`（18） |
+| `assert-extension-install.mjs` | 「扩展」分区的安装路径：可安装清单是服务端硬编码白名单（客户端传什么都不作数）、link 模式拒绝安装、装完先重扫再回话、包名过正则（`-g`/`;rm`/路径穿越一律拒绝）、pnpm 用 `spawn` 且 `shell:false`、ndjson 折叠成「阶段 + 已导入包数」（同一个包不重复计数）、进度结构里没有 `percent`（不编造百分比）、`minimumReleaseAge` 被拒时给出人能读的解释、扩展是导航与页面的最后一段、勾选走同一个 `allowedEngines` 路径 ；可安装条目是**一条带框的单行**（详情进悬停卡片，名称在左、按钮在右），安装进度用 `flex:1 1 100%` 独占第二行| `node tools/assert-extension-install.mjs`（20） |
+| `assert-extension-target.mjs` | 扩展装进哪个 profile：`activeProfileDir()` 用 `realpath` 比对「这一份插件自己」所在的 profile（多 profile 时按扫描顺序取第一个会装错，装了也不会被加载）；link 模式只拦「自升级自己」，不拦装扩展；列表回传 `canInstall` 与 `installProfile`，页面把目标 profile 写出来；按钮只看 `canInstall` | `node tools/assert-extension-target.mjs`（7） |
+| `assert-extension-credentials.mjs` | 扩展的凭据输入：服务端 `extensions()` 回传每个已装引擎声明的 key 是否已配置（只探测 `requiresKey` 里的名字，不遍历全表）、客户端按 `requiresKey` 渲染输入框（不写死 `WEBZ_API_TOKEN`）、保存走现成的 `credentials-set` 路由、输入框是 `password` 且保存成功后清空草稿、runner 读的键名与界面同源 | `node tools/assert-extension-credentials.mjs`（5） |
+| `assert-activity-panel.mjs` | 右侧栏搜索动态（#144）：记录只在内存不落盘、历史上限 50、来源上限 8、按会话隔离、进行中/完成状态、引擎结果分类（成功/失败类别/跳过原因）、清空、默认关闭、旧宿主无右侧栏服务时整体跳过、tab 正文+标题+引导入口注册、bridge 路由走统一守卫、工具分发携带会话、轮询随卸载停止、中英文案 | `node tools/assert-activity-panel.mjs`（15） |
+| `assert-activity-wiring.mjs` | 搜索动态接线（#144 回归）：配置项默认关闭且能完整往返、座位标志只在服务注入后才置位、加载时已开启也能挂载、tab id 三处共用、引导入口带 commandId 且标题/描述是函数、package.json 声明 `dsh-client-ui-sidebar-right` 为可选 peer 与 client inject、服务缺失时有 try/catch 兜底 | `node tools/assert-activity-wiring.mjs`（8） |
+| `assert-activity-pipeline.mjs` | 搜索动态数据面端到端：工具钩子把会话带进搜索链、记录归属该会话、进行中可见当前引擎、结束后离开 in-flight、引擎结果与来源往返完好、无归属记录仍可见、会话之间不串、底部计数已接线、两条 bridge 路由都过统一守卫、面板轮询随卸载停止 | `node tools/assert-activity-pipeline.mjs`（20） |
+| `assert-restore-cli.mjs` | 卸载后清理入口（#159）：`restore` 子命令不依赖插件运行时、只删插件自己写进去的 `searchProvider: ddg` / `fetchProvider: fs-quality-fetch`、用户显式选的 provider 不动、只剩 id+name 的空行整行删除、注释/顺序/引号/CRLF 保留、写入前备份、重复运行无副作用、`--dry-run` 不写、`--profile` 只清指定 profile、参数不明时拒绝写入 | `node tools/assert-restore-cli.mjs`（12） |
+| `assert-upgrade-version.mjs` | 一键升级以实际安装结果为准（#163）：读回 profile 里真正落下的版本、与 registry 比较、冷却拦截单独报 `upgrade-blocked`、成功路径报 installed 而非 latest、读不到安装状态时不算成功、界面 toast 用 installed、被拦截时用告警色并保留原文案 | `node tools/assert-upgrade-version.mjs`（8） |
+| `assert-search-proxy.mjs` | 搜索代理（#155）的规则层：http/https/socks5 地址解析、凭据百分号解码、无 scheme 视为 http、socks5h 交给代理解析、非法协议拒绝、`no_proxy` 优先于显式设置、空设置不接管环境变量代理、活动代理是配置层写入的模块状态、搜索路径不再直连全局 `fetch`、该设置只管引擎（天气/更新检查/抓取层保持平台 fetch）、界面中英双语文案、SOCKS5 由本仓库自己实现、重定向三档语义、abort/timeout 保持原生 error 名、HTTP/1.1 请求必须走我们自己的隧道 socket（`agent: false` 与 `https.request` 都会静默绕过代理）、新增依赖为零 | `node tools/assert-search-proxy.mjs`（18） |
+| `assert-proxy-tunnel.mjs` | 代理隧道实测（#155）：本地 CONNECT 代理与手写 SOCKS5 服务端，验证方法/路径/body/host 透传、Basic 凭据解码、每次请求一条隧道且响应后关闭、`follow`/`manual`/`error` 三档重定向语义、303 把 POST 降为 GET、gzip 解压、CONNECT 407 明确报错、代理接受 CONNECT 后立刻断开时不回落直连、不可达代理快速失败、`no_proxy` 绕过隧道、SOCKS5 无认证与用户名密码两档、认证被拒与断线报错 | `node tools/assert-proxy-tunnel.mjs`（17） |
+| `assert-proxy-wiring.mjs` | 搜索代理的接线回归（#155）：绕过 `searchOnce` 的入口（`runEngineTest` / `runMultiSearch` / 设置页测试 bridge）自己写活动值、统一出口挂「现读配置」的兜底 resolver、活动值优先于 resolver、配置为空仍直连、resolver 抛错时降级为直连而不是崩溃、`proxyFetch` 在没人写过活动值时不忽略配置的代理 | `node tools/assert-proxy-wiring.mjs`（7） |
+| `assert-fetch-alpn.mjs` | #162：https 每一跳都声明 `ALPNProtocols: ["http/1.1"]`（只此一个，不带 h2——响应按 HTTP/1.1 解析）、http 目标不声明、按重定向目标的协议逐跳判断、browser 层被跳过时 errors 里写明原因、两个 HTML 返回点都经过瘦身 | `node tools/assert-fetch-alpn.mjs`（7） |
+| `assert-fetch-html-slim.mjs` | #161：`slimHtml()` 去掉 style/script/noscript/template/注释、只清超长 base64 `data:`（短图标保留）、普通页面逐字节不变、幂等、大小写与跨行标签、构造一个 260 KB 内联 CSS 的页面后同样 200,000 字符预算下正文确实在 | `node tools/assert-fetch-html-slim.mjs`（9） |
+| `assert-browser-path.mjs` | T1.5 浏览器路径（#160）：留空仍走内置候选表、纯空格等同空值、自定义路径原样使用、路径不存在时不回落到其它浏览器、探测缓存随配置失效、provider 收到的是配置值而非硬编码、配置项默认空、设置页能完整读写、输入框只在 T1.5 开启时出现、中英文提示都写明不回落规则 | `node tools/assert-browser-path.mjs`（9） |
+| `assert-control-chrome.mjs` | 字段标题与复选框外观：标题字号/字重要高于正文、复选框由样式绘制（`appearance:none` + CSS 勾）、不确定态有独立横线、聚焦有描边、深浅色都覆盖、分组自动换行、全选不拉满整行、工具行复选框不再固定 150px | `node tools/assert-control-chrome.mjs`（9） |
+| `assert-checkbox-labels.mjs` | 复选框不再重复标签：左侧栏入口 / 斜杠命令 / 免 key 优先三项各只出现一次标签、标签位于复选框同一行、其它输入类字段仍保留独立标题 | `node tools/assert-checkbox-labels.mjs`（5） |
+| `assert-dropdown.mjs` | 自绘下拉：设置页不再有原生 `<select>`、11 处全部走同一个组件、保留 `onChange({ target })` 契约与 listbox 语义、键盘（↑↓/Home/End/Enter/Esc/Tab）可用、浮层限高滚动、深浅色都有样式 | `node tools/assert-dropdown.mjs`（6） |
+| `assert-engine-setting-fields.mjs` | 引擎设置字段签名：每个 `engineSettingField` 调用都按 `(id, label, value, setter, options)` 传参、没有把 label 当 id、Tavily 端点字段接线正确 | `node tools/assert-engine-setting-fields.mjs`（3） |
+| `assert-fallback-row-layout.mjs` | 回退优先级行对齐：没有高级设置的引擎也渲染不可见占位按钮、占位不参与交互、设置按钮列固定宽度、key 输入框不再撑满剩余空间 | `node tools/assert-fallback-row-layout.mjs`（4） |
+| `assert-settings-order.mjs` | 设置页顺序：提示词段在三个全局开关之前、开关彼此相邻且保持原顺序、提示词是最后一个带分区的段、右侧目录顺序与页面一致 | `node tools/assert-settings-order.mjs`（5） |
+| `assert-section-separator.mjs` | 模块之间的横线：规则必须真实存在（含深色模式），八个模块里只有后七个画线（第一个模块上方不凭空多一条），每条线挂在模块的**第一个控件**上而不是模块内部，语言池（两个池字段 + 凭据策略字段）只画一条、不被劈成两半 | `node tools/assert-section-separator.mjs`（4） |
+| `assert-header-description.mjs` | 卡片标题区只显示插件名（去掉副标题那一行）；摘要文案仍保留给插件列表行使用；废弃样式已清 | `node tools/assert-header-description.mjs`（4） |
+| `assert-mobile-layout.mjs` | 移动端布局（≤560px）：桌面 150px 分区留白由 `dshfs-page` 类承载而非内联样式、移动端只覆盖该类 padding、移动端块不含已删除的 `.dshfs-description` / `.dshfs-select` 规则、分区 Tab 在文档流内不依赖宿主头部高度 | `node tools/assert-mobile-layout.mjs`（8） |
+| `assert-multikey-layout.mjs` | 多 key 输入的行高（#154 回归）：输入框是裸 textarea 不带提示段落、格式说明只在 placeholder / title、双语提示仍完整、废弃样式已删 | `node tools/assert-multikey-layout.mjs`（4） |
 | `assert-multikey-ui.mjs` | 多 key 输入（#154）：后端支持换行/逗号/分号分隔、设置页为 textarea 而非单行密码框、提示写明格式与轮换顺序 | `node tools/assert-multikey-ui.mjs`（4） |
 | `assert-pool-policy.mjs` | 按次计费引擎入池（#152）：7 个引擎全覆盖、策略归一化（含大小写与非法值）、`off` 保持现状、`auto`/`multi` 放行、Auto 可把按次计费引擎排到首位、`off` 写进池也不生效、策略进入缓存键 | `node tools/assert-pool-policy.mjs`（9） |
 | `assert-pool-prompt.mjs` | 入池策略与提示词一致（#152）：`off` 保留「只在显式选择时运行」、`auto` 改写为「最多一个、计费一次」、`multi` 改写为「每个引擎各计费一次」、Multi 池只在 `multi` 档列出按次计费引擎、中文文案同步 | `node tools/assert-pool-prompt.mjs`（5） |
 | `assert-fetch-ssrf-wiring.mjs` | #156 回归：`lib/index.js` 必须以 provider 自己的选项名 `allowedCidrs` 传白名单（写成 `allowFakeIpCidrs` 会被静默丢弃）、白名单能到达 `validateUrl`、错拼的键回退为空列表 | `node tools/assert-fetch-ssrf-wiring.mjs`（3） |
 | `assert-rail-keys.mjs` | 侧栏目录的渲染 key：每项圆点与文字两个子元素都必须带稳定 key，避免 React 在每次渲染时报 unique key 警告 | `node tools/assert-rail-keys.mjs`（3） |
-| `assert-mcp-response-cap.mjs` | #147 MCP stdio 单条响应上限：字符/字节双上限默认值与环境覆盖、0 关闭、多字节文本不超 64KB 行、handler 对结果与错误统一截断、web_fetch 先按上限收缩、research 文档按剩余预算均分 | `node tools/assert-mcp-response-cap.mjs`（12） |
+| `assert-mcp-response-cap.mjs` | #147 MCP stdio 单条响应上限：字符/字节/整行三重上限默认值与环境覆盖、0 关闭、多字节文本不超 64KB 行、**JSON 转义后的整行不超 64KB**（引号/换行/反斜杠密集三种形状）、不重复叠加截断提示、不切在代理对中间、handler 对结果与错误统一截断、web_fetch 先按上限收缩、research 文档按剩余预算均分 | `node tools/assert-mcp-response-cap.mjs`（18） |
 | `assert-fetch-ssrf.mjs` | 抓取 SSRF 防护：公网/私网/保留地址判定、DNS 解析到私网拒绝、localhost 与 IP 字面量拒绝、`http://` 与 `https://` 放行而其他协议与带凭据 URL 拒绝、http 目标解析到私网同样拒绝、fake-ip 网段默认拒绝且仅按配置放行、IPv6 ULA 显式放行、放行后仍拒绝回环/IPv4 私网/链路本地、provider 接线与设置项 | `node tools/assert-fetch-ssrf.mjs`（10） |
 | `assert-fetch-http.mjs` | 明文 http 目标（#143）：直连层按协议选 transport、http 重定向可跟随、provider 不再在入口拒绝 http 而交给 tier 链、全层失败报直连原因而不再报 only https、非 http(s) 协议仍拒、`agentForUrl` 为 http 目标选明文隧道 agent、经 `CONNECT` 隧道抓取 http 页面 | `node tools/assert-fetch-http.mjs`（7） |
 | `assert-mcp.mjs` | MCP stdio 面：initialize 协议协商、tools/list 的 JSON Schema、tools/call 文本结果、工具错误与 JSON-RPC 错误区分、必填参数校验、显式付费引擎与新 provider、advanced/multi/domain/platform/video/research/weather 新工具、bin/files 打包 | `node tools/assert-mcp.mjs`（10） |
@@ -1186,6 +1222,8 @@ fetchProviderForce: false # true = also take over the deepseek-fetch-api written
 browserFetch: true           # use the system browser headless renderer when direct fetch fails
 allowFakeIpCidrs: []          # reserved ranges to allow explicitly, e.g. 198.18.0.0/15 for Clash/mihomo fake-ip
 fetchPrefer: exa             # exa | firecrawl — which keyed fetch tier to try first
+deepseekFetchBaseUrl: ""    # optional DeepSeek fetch endpoint. Official: https://api.deepseek.com/v1/tools (the code appends /fetch; https://api.deepseek.com alone is auto-corrected). Gateway: http://127.0.0.1:3000/v1 or a full …/fetch. Empty = off; failures fall back to direct / exa / firecrawl
+deepseekFetchApiKey: ...     # optional: only for this fetch endpoint; empty reuses the tools key, then DEEPSEEK_API_KEY
 region: cn-zh               # DuckDuckGo region (optional)
 searxngInstances:           # Custom SearXNG instances (optional)
   - https://your-instance.example
@@ -1404,7 +1442,7 @@ Restart `dsh web` after switching to apply changes.
 
 #### Offline self-check assertions (`tools/`)
 
-**Eighty-seven** zero-dependency assertion scripts ship with the repo (**1178 assertions** total)
+**One hundred and twenty-three** zero-dependency assertion scripts ship with the repo (**1525 assertions** total)
 
 | Script | Covers | Run (count) |
 |---|---|---|

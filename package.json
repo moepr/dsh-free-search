@@ -1,6 +1,6 @@
 {
   "name": "dsh-free-search",
-  "version": "0.9.76",
+  "version": "0.9.88",
   "description": "Free web search for DeepSeek Harness: 42 engines (Bing/DuckDuckGo/AnySearch/SearXNG/Exa/Tavily/Keenable/Firecrawl/Parallel/Brave/Zhipu/You.com keyless; Zhihu global/site via MCP and Perplexity/SerpBase/DeepSeek (official + native tools/search)/Baidu/Kimi/Aliyun/Doubao/Google CSE/Metaso/Yandex/Yuanbao/SpecStream with key; OpenAI/Gemini/Claude model built-in search, explicit-only) + auto smart routing + global engine enable/disable & fallback priority + editable zh/en language pools + multi mode (parallel full language-pool merge) + multi_search cross-source tool + failure-aware fallback (quota/auth cooldown, transient retry, fallbackOn) + time filtering + platform search + domain blocklist (blockedDomains) + web_fetch, with web settings UI, plus a standalone stdio MCP server.",
   "type": "module",
   "main": "lib/index.js",
@@ -78,7 +78,8 @@
     "@deepseek-ai/dsh-settings": "^0.1.7-rc.1 || ^0.2.0-rc.1 || ^0.3.0-0",
     "@deepseek-ai/dsh-tools": "^0.1.7-rc.1 || ^0.2.0-rc.1 || ^0.3.0-0",
     "@deepseek-ai/schemastery": ">=3.18.4 <4",
-    "react": "^18.2.0"
+    "react": "^18.2.0",
+    "@deepseek-ai/dsh-client-ui-sidebar-right": "^0.1.7-rc.1 || ^0.2.0-rc.1 || ^0.3.0-0"
   },
   "peerDependenciesMeta": {
     "@deepseek-ai/cordis": {
@@ -104,6 +105,9 @@
     },
     "react": {
       "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-sidebar-right": {
+      "optional": true
     }
   },
   "devDependencies": {
@@ -122,7 +126,8 @@
       "inject": [
         "@deepseek-ai/dsh-client-ui-commands",
         "@deepseek-ai/dsh-client-ui-plugin-manager",
-        "@deepseek-ai/dsh-client-ui-renderer"
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-sidebar-right"
       ],
       "platform": "web"
     },
@@ -142,6 +147,7 @@
     }
   },
   "bin": {
-    "dsh-free-search-mcp": "./bin/mcp.js"
+    "dsh-free-search-mcp": "./bin/mcp.js",
+    "dsh-free-search": "./bin/restore.js"
   }
 }
