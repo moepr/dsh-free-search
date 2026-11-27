@@ -10,8 +10,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const target = path.join(here, "node_modules", "@deepseek-ai");
+// This file lives in tools/, but the peer links have to sit in the PACKAGE
+// root's node_modules — that is the directory Node's resolution walks up to.
+// Using `here` as if it were the package root put the links in
+// tools/node_modules, which nothing ever resolves: the install printed
+// "linked 7 host peer(s)" while every peer stayed missing.
+const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const target = path.join(packageRoot, "node_modules", "@deepseek-ai");
 const names = [
   "schemastery", "cordis", "dsh-llm", "dsh-settings", "dsh-tools",
   "dsh-credentials", "dsh-web",
@@ -25,7 +30,7 @@ const home = process.env.HOME || process.env.USERPROFILE || "";
 for (const base of [
   process.env.DSH_HOME ? path.join(process.env.DSH_HOME, "dsh", "node_modules") : "",
   path.join(home, ".dsh-host", "dsh", "node_modules"),
-  path.resolve(here, "../../../..", "node_modules"),
+  path.resolve(packageRoot, "../../../..", "node_modules"),
 ]) if (base) candidates.push(base);
 
 const pnpmRootOf = (nm) => path.join(nm, ".pnpm");
